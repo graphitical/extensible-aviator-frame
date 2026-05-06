@@ -1,0 +1,50 @@
+// aviator_lens.kcl - Tuning Tool for Aviator Teardrop Shape
+// Use the KCL Visualizer to drag the cage points and tune the lens shape.
+import bsplineSegments, bsplineStartPoint from "lib_bspline.kcl"
+
+// 1. The B-Spline Cage (Control Polygon)
+// DRAG THESE POINTS in the visualizer to shape the lens.
+cage = sketch(on = XY) {
+  // Top inner corner
+  seg1 = line(start = [var 0mm, var 0mm], end = [var 4.49mm, var 15.05mm], construction = true)
+  // Top outer corner
+  seg2 = line(start = [var 4.49mm, var 15.05mm], end = [var 23.62mm, var 16.74mm], construction = true)
+  // Outer side
+  seg3 = line(start = [var 23.62mm, var 16.74mm], end = [var 50.46mm, var 10.06mm], construction = true)
+  // Bottom outer
+  seg4 = line(start = [var 50.46mm, var 10.06mm], end = [var 27.74mm, var -23.06mm], construction = true)
+  // Bottom inner (teardrop dip)
+  seg5 = line(start = [var 27.74mm, var -23.06mm], end = [var 2.87mm, var -21.61mm], construction = true)
+  // Back to start
+  seg6 = line(start = [var 2.87mm, var -21.61mm], end = [var 0mm, var 0mm], construction = true)
+  coincident([seg5.end, seg6.start])
+  coincident([seg5.start, seg4.end])
+  coincident([seg4.start, seg3.end])
+  coincident([seg3.start, seg2.end])
+  coincident([seg2.start, seg1.end])
+  coincident([seg6.end, ORIGIN])
+}
+
+// 2. Control Point Extraction
+p0 = cage.seg1.start.at
+p1 = cage.seg1.end.at
+p2 = cage.seg2.end.at
+p3 = cage.seg3.end.at
+p4 = cage.seg4.end.at
+p5 = cage.seg5.end.at
+
+// 3. Generate the Smooth Closed Spline
+startPt = bsplineStartPoint(p0, p1, p2)
+
+aviatorLens = startSketchOn(XY)
+  |> startProfile(at = startPt)
+  |> bsplineSegments(
+       p0,
+       p1,
+       p2,
+       p3,
+       p4,
+       p5,
+     )
+  |> close()
+  |> extrude(length = 2) // Extrude for visual confirmation
