@@ -11,6 +11,16 @@ This project is a demonstration of high-fidelity, organic CAD design in KCL, cen
 *   **Parametric Assembly:** The design is fully interactive. The "Master Cage" in `main.kcl` allows a user to tune the organic lens shape in real-time, with the symmetric 3D rims, glass lenses, and gold-metallic frame updating instantly.
 *   **Visual Polish:** Leverages advanced `appearance` properties, including light-blue glass transparency (`opacity: 0.7`) and polished gold metallic finishes (`metalness: 1.0`, `roughness: 0.2`).
 
+## See it in Action: Interactive Tuning
+
+To experience the power of the B-Spline "Control Cage," open **`aviator_lens.kcl`** in the Zoo Modeling App. 
+
+1.  **Enable the Sketcher:** Select the `cage` sketch.
+2.  **Tune the Shape:** Drag the control points in real-time.
+3.  **Watch the Magic:** The high-fidelity smooth curve and 3D lens will update instantly as you manipulate the low-fidelity cage.
+
+This demonstration shows how code-native CAD can bridge the gap between rough ideation and precise, organic manufacturing.
+
 ## Philosophy of Remixability
 
 My primary goal was to provide **utility over variety**. Instead of just making a pair of glasses for people to remix, I wanted to provide the "Legos" of advanced KCL design. By providing standalone libraries for splines and symmetry, I am giving the community the tools they need to build their own organic, symmetric products—whether they are building eyewear, furniture, or vehicles.
