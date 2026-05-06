@@ -1,0 +1,21 @@
+// lib_mirror.kcl - Mirroring utility for KittyCAD Language (KCL)
+// Achieve 3D symmetry by mathematically reflecting the coordinate system (Planes).
+
+// Reflects a 3D vector across a plane defined by its normal vector.
+export fn reflect(v, n) {
+  dot = v[0] * n[0] + v[1] * n[1] + v[2] * n[2]
+  return [
+    v[0] - 2 * dot * n[0],
+    v[1] - 2 * dot * n[1],
+    v[2] - 2 * dot * n[2]
+  ]
+}
+
+// Mirrors a KCL Plane Record across a plane defined by a normal vector.
+export fn mirrorPlane(@p, planeNormal) {
+  return {
+    origin = reflect(v = p.origin, n = planeNormal),
+    xAxis  = reflect(v = p.xAxis,  n = planeNormal),
+    yAxis  = reflect(v = p.yAxis,  n = planeNormal)
+  }
+}

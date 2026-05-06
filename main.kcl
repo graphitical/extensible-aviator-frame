@@ -1,33 +1,16 @@
 // aviator_lens8.kcl - Final Mirrored Aviator (v8)
 // Exact shape from aviator_lens.kcl with true YZ reflection
 import bsplineSegments, bsplineStartPoint from "lib_bspline.kcl"
+import mirrorPlane from "lib_mirror.kcl"
 import profileWire from "profiles.kcl"
 import bridgeArc, templePath from "paths.kcl"
 
-// --- 1. Mirroring Toolbox ---
-fn reflect(v, n) {
-  dot = v[0] * n[0] + v[1] * n[1] + v[2] * n[2]
-  return [
-    v[0] - 2 * dot * n[0],
-    v[1] - 2 * dot * n[1],
-    v[2] - 2 * dot * n[2]
-  ]
-}
-
-fn mirrorPlane(@p, planeNormal) {
-  return {
-    origin = reflect(v = p.origin, n = planeNormal),
-    xAxis  = reflect(v = p.xAxis,  n = planeNormal),
-    yAxis  = reflect(v = p.yAxis,  n = planeNormal)
-  }
-}
-
-// --- 2. Parameters ---
+// --- 1. Parameters ---
 lensW = 39
 bridgeW = 12
 templeLen = 80
 
-// --- 3. Master Cage (Exact Points from aviator_lens.kcl) ---
+// --- 2. Master Cage (Exact Points from aviator_lens.kcl) ---
 export cage = sketch(on = XZ) {
   // Top inner corner
   seg1 = line(start = [var -8mm, var 8.88mm], end = [var 14.77mm, var 14.54mm], construction = true)
@@ -57,7 +40,7 @@ p3 = cage.seg3.end.at
 p4 = cage.seg4.end.at
 p5 = cage.seg5.end.at
 
-// --- 4. Render Logic ---
+// --- 3. Render Logic ---
 fn drawLens(@on, depth) {
   startPt = bsplineStartPoint(p0, p1, p2)
   return startSketchOn(on)
@@ -115,7 +98,7 @@ fn temple(@plane) {
 templeL = temple(tPlaneL)
 templeR = temple(tPlaneR)
 
-// --- 5. Visual Styles (Gold & Glass) ---
+// --- 4. Visual Styles (Gold & Glass) ---
 // Glass Lenses
 leftLens |> appearance(color = "#add8e6", opacity = 40, roughness = 0)
 rightLens |> appearance(color = "#add8e6", opacity = 40, roughness = 0)
