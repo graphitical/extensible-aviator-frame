@@ -1,0 +1,110 @@
+// paths.kcl - Path Factory for Extensible Frame
+import bsplineSegments, bsplineStartPoint from "lib_bspline.kcl"
+
+// A simple circular path for the lens rim.
+export fn rimRound(@diameter, on) {
+  r = diameter / 2
+  return startSketchOn(on)
+    |> startProfile(at = [r, 0])
+    |> arc(angleStart = 0deg, angleEnd = 180deg, radius = r)
+    |> arc(angleStart = 180deg, angleEnd = 359.9deg, radius = r)
+}
+
+// A rectangular path with four rounded corners.
+export fn rimRectangular(@width, height, cornerRadius, on) {
+  halfW = width / 2
+  halfH = height / 2
+  r = cornerRadius
+
+  return startSketchOn(on)
+    |> startProfile(at = [halfW - r, halfH])
+    |> arc(angleStart = 90deg, angleEnd = 0deg, radius = r)
+    |> line(endAbsolute = [halfW, -halfH + r])
+    |> arc(angleStart = 0deg, angleEnd = -90deg, radius = r)
+    |> line(endAbsolute = [-halfW + r, -halfH])
+    |> arc(angleStart = -90deg, angleEnd = -180deg, radius = r)
+    |> line(endAbsolute = [-halfW, halfH - r])
+    |> arc(angleStart = 180deg, angleEnd = 90.1deg, radius = r)
+}
+
+
+// A simple bridge arc using a 3-point arc.
+export fn bridgeArc(@width, height, on) {
+  halfW = width / 2
+  return startSketchOn(on)
+    |> startProfile(at = [-halfW, 0])
+    |> arc(interiorAbsolute = [0, height], endAbsolute = [halfW, 0])
+}
+
+// A simple temple path.
+export fn templePath(@length, hookAngle, on) {
+  return startSketchOn(on)
+    |> startProfile(at = [0, 0])
+    |> line(endAbsolute = [length, 0])
+    |> arc(angleStart = 90deg, angleEnd = 90deg - hookAngle, radius = 45)
+}
+
+// An aviator teardrop path using B-Splines.
+export fn rimAviator(@width, height, on) {
+  halfW = width / 2
+  halfH = height / 2
+  
+  p0 = [-halfW * 0.2, halfH]
+  p1 = [halfW, halfH * 0.8]
+  p2 = [halfW * 0.8, -halfH]
+  p3 = [0, -halfH * 0.9]
+  p4 = [-halfW * 0.8, -halfH]
+  p5 = [-halfW, halfH * 0.5]
+
+  startPt = bsplineStartPoint(p0, p1, p2)
+
+  return startSketchOn(on)
+    |> startProfile(at = startPt)
+    |> bsplineSegments(p0, p1, p2, p3, p4, p5)
+    |> close()
+}
+
+// A stable aviator teardrop path using tangent arcs.
+export fn rimAviatorAlternative(@width, height, on) {
+  halfW = width / 2
+  halfH = height / 2
+  
+  return startSketchOn(on)
+    |> startProfile(at = [0, halfH])
+    |> arc(angleStart = 90deg, angleEnd = -10deg, radius = halfW * 0.6)
+    |> arc(angleStart = -10deg, angleEnd = -170deg, radius = halfW * 0.5)
+    |> arc(angleStart = -170deg, angleEnd = -269.9deg, radius = halfW * 0.6)
+}
+
+
+
+
+// A half-moon path using a line and B-Spline.
+export fn rimHalfMoon(@width, height, on) {
+  halfW = width / 2
+  halfH = height / 2
+  
+  p0 = [halfW, 0]
+  p1 = [halfW, -halfH]
+  p2 = [halfW * 0.5, -halfH * 1.2]
+  p3 = [-halfW * 0.5, -halfH * 1.2]
+  p4 = [-halfW, -halfH]
+  p5 = [-halfW, 0]
+
+  startPt = bsplineStartPoint(p0, p1, p2)
+
+  return startSketchOn(on)
+    |> startProfile(at = [-halfW, 0])
+    |> line(endAbsolute = [halfW, 0])
+    |> line(endAbsolute = startPt)
+    |> bsplineSegments(p0, p1, p2, p3, p4, p5)
+    |> close()
+}
+
+// A simple straight bridge path.
+export fn bridgeStraight(@width, on) {
+halfW = width / 2
+return startSketchOn(on)
+|> startProfile(at = [-halfW, 0])
+|> line(endAbsolute = [halfW, 0])
+}

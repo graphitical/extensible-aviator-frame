@@ -1,0 +1,127 @@
+// aviator_lens8.kcl - Final Mirrored Aviator (v8)
+// Exact shape from aviator_lens.kcl with true YZ reflection
+import bsplineSegments, bsplineStartPoint from "lib_bspline.kcl"
+import profileWire from "profiles.kcl"
+import bridgeArc, templePath from "paths.kcl"
+
+// --- 1. Mirroring Toolbox ---
+fn reflect(v, n) {
+  dot = v[0] * n[0] + v[1] * n[1] + v[2] * n[2]
+  return [
+    v[0] - 2 * dot * n[0],
+    v[1] - 2 * dot * n[1],
+    v[2] - 2 * dot * n[2]
+  ]
+}
+
+fn mirrorPlane(@p, planeNormal) {
+  return {
+    origin = reflect(v = p.origin, n = planeNormal),
+    xAxis  = reflect(v = p.xAxis,  n = planeNormal),
+    yAxis  = reflect(v = p.yAxis,  n = planeNormal)
+  }
+}
+
+// --- 2. Parameters ---
+lensW = 39
+bridgeW = 12
+templeLen = 80
+
+// --- 3. Master Cage (Exact Points from aviator_lens.kcl) ---
+export cage = sketch(on = XZ) {
+  // Top inner corner
+  seg1 = line(start = [var -8mm, var 8.88mm], end = [var 14.77mm, var 14.54mm], construction = true)
+  // Top outer corner
+  seg2 = line(start = [var 14.77mm, var 14.54mm], end = [var 33.11mm, var 14.37mm], construction = true)
+  // Outer side
+  seg3 = line(start = [var 33.11mm, var 14.37mm], end = [var 46.49mm, var 1.53mm], construction = true)
+  // Bottom outer
+  seg4 = line(start = [var 46.49mm, var 1.53mm], end = [var 33.22mm, var -22.48mm], construction = true)
+  // Bottom inner (teardrop dip)
+  seg5 = line(start = [var 33.22mm, var -22.48mm], end = [var 13.15mm, var -22.12mm], construction = true)
+  // Back to start
+  seg6 = line(start = [var 13.15mm, var -22.12mm], end = [var -8mm, var 8.88mm], construction = true)
+  coincident([seg5.end, seg6.start])
+  coincident([seg5.start, seg4.end])
+  coincident([seg4.start, seg3.end])
+  coincident([seg3.start, seg2.end])
+  coincident([seg2.start, seg1.end])
+  coincident([seg1.start, seg6.end])
+}
+
+// Extract control points
+p0 = cage.seg1.start.at
+p1 = cage.seg1.end.at
+p2 = cage.seg2.end.at
+p3 = cage.seg3.end.at
+p4 = cage.seg4.end.at
+p5 = cage.seg5.end.at
+
+// --- 4. Render Logic ---
+fn drawLens(@on, depth) {
+  startPt = bsplineStartPoint(p0, p1, p2)
+  return startSketchOn(on)
+    |> startProfile(at = startPt)
+    |> bsplineSegments(p0, p1, p2, p3, p4, p5)
+    |> close()
+    |> extrude(length = depth, symmetric = true)
+}
+
+// Left Rim Plane (Inner corner at -6, growing outward to -56)
+rimPlaneL = {
+  origin = [-bridgeW / 3, 0, 0],
+  xAxis = [-1, 0, 0],
+  yAxis = [0, 0, 1]
+}
+
+// Right Rim Plane (Mirrored across YZ plane x=0)
+// This will result in an origin at [6, 0, 0] and xAxis at [1, 0, 0]
+rimPlaneR = mirrorPlane(rimPlaneL, planeNormal = [1, 0, 0])
+
+// Render both
+// We use depth=2 for Left and depth=-2 for Right to keep 3D thickness symmetric
+// because mirrorPlane flips the coordinate system handedness.
+leftLens = drawLens(rimPlaneL, depth=2)
+rightLens = drawLens(rimPlaneR, depth=-2)
+
+wireD = 1.5
+bridge = sweep(
+  profileWire(wireD, on = XZ) 
+    |> translate(x = -bridgeW/2), 
+  path = bridgeArc(bridgeW, height = 3, on = XZ)
+)
+
+bridge2 = sweep(
+  profileWire(wireD, on = XZ)
+    |> translate(x = -bridgeW/2),
+    path = bridgeArc(bridgeW, height=0.001, on = XZ)
+) |> translate(z=8)
+
+
+ZY = {
+  origin = [0, 0, 0],
+  xAxis = [0, 0, 1],
+  yAxis = [0, 1, 0]
+}
+tPlaneL = offsetPlane(YZ, offset = -(lensW + bridgeW/2))
+tPlaneR = mirrorPlane(tPlaneL, planeNormal=[1, 0, 0])
+
+fn temple(@plane) {
+  return sweep(profileWire(wireD, on=plane),
+    path = templePath(templeLen, hookAngle = 45, on = plane)
+  )
+}
+
+templeL = temple(tPlaneL)
+templeR = temple(tPlaneR)
+
+// --- 5. Visual Styles (Gold & Glass) ---
+// Glass Lenses
+leftLens |> appearance(color = "#add8e6", opacity = 40, roughness = 0)
+rightLens |> appearance(color = "#add8e6", opacity = 40, roughness = 0)
+
+// Gold Frame
+bridge |> appearance(color = "#ffd700", metalness = 100, roughness = 90)
+bridge2 |> appearance(color = "#ffd700", metalness = 100, roughness = 90)
+templeL |> appearance(color = "#ffd700", metalness = 100, roughness = 90)
+templeR |> appearance(color = "#ffd700", metalness = 100, roughness = 90)
