@@ -1,0 +1,440 @@
+// aviator_hardware.kcl - Aviator frame hardware module
+// Builds bridge, brow bar, and temple hardware from shared parameters.
+import lensBridgeW, templeHingeOffset, bridgeAnchorZ, bridgeRise, bridgeHalfSpan, bridgeOvalMajorD, bridgeOvalMinorD, topBarHalfSpan, topBarZ, ovalTempleMajorD, ovalTempleMinorD, ovalTopBarMajorD, ovalTopBarMinorD, templeLen, templeHookRadius, templeHookForward, templeHookDrop from "aviator_params.kcl"
+import mirrorPlane from "lib_mirror.kcl"
+
+bridgeArcRadius = (bridgeHalfSpan / bridgeRise * bridgeHalfSpan + bridgeRise) / 2
+bridgeTopZ = bridgeAnchorZ + bridgeRise
+bridgeArcCenterZ = bridgeTopZ - bridgeArcRadius
+bridgeArcAngle = 2 * atan2(y = bridgeHalfSpan, x = bridgeAnchorZ - bridgeArcCenterZ)
+bridgeProfilePlane = {
+  origin = [bridgeHalfSpan, 0, bridgeAnchorZ],
+  xAxis = [0, 1, 0],
+  yAxis = [
+    -bridgeHalfSpan / bridgeArcRadius,
+    0,
+    -(bridgeAnchorZ - bridgeArcCenterZ) / bridgeArcRadius
+  ]
+}
+bridgeOvalCapOffset = (bridgeOvalMajorD - bridgeOvalMinorD) / 2
+
+bridgeProfileSketch = sketch(on = bridgeProfilePlane) {
+  bridgeTopSide = line(start = [var 0.45mm, var 0.55mm], end = [var -0.45mm, var 0.55mm])
+  bridgeLeftCap = arc(start = [var -0.45mm, var 0.55mm], end = [var -0.45mm, var -0.55mm], center = [var -0.45mm, var 0mm])
+  bridgeBottomSide = line(start = [var -0.45mm, var -0.55mm], end = [var 0.45mm, var -0.55mm])
+  bridgeRightCap = arc(start = [var 0.45mm, var -0.55mm], end = [var 0.45mm, var 0.55mm], center = [var 0.45mm, var 0mm])
+  bridgeRevolveAxis = line(start = [var -5mm, var 5.6mm], end = [var 5mm, var 5.6mm])
+
+  coincident([bridgeTopSide.end, bridgeLeftCap.start])
+  coincident([
+    bridgeLeftCap.end,
+    bridgeBottomSide.start
+  ])
+  coincident([
+    bridgeBottomSide.end,
+    bridgeRightCap.start
+  ])
+  coincident([
+    bridgeRightCap.end,
+    bridgeTopSide.start
+  ])
+
+  verticalDistance([bridgeTopSide.start, bridgeTopSide.end]) == 0mm
+  verticalDistance([
+  bridgeBottomSide.start,
+  bridgeBottomSide.end
+]) == 0mm
+  tangent([bridgeTopSide, bridgeLeftCap])
+  tangent([bridgeLeftCap, bridgeBottomSide])
+  tangent([bridgeBottomSide, bridgeRightCap])
+  tangent([bridgeRightCap, bridgeTopSide])
+
+  horizontalDistance([ORIGIN, bridgeRightCap.center]) == bridgeOvalCapOffset
+  verticalDistance([ORIGIN, bridgeRightCap.center]) == 0mm
+  horizontalDistance([ORIGIN, bridgeLeftCap.center]) == -bridgeOvalCapOffset
+  verticalDistance([ORIGIN, bridgeLeftCap.center]) == 0mm
+  radius(bridgeRightCap) == bridgeOvalMinorD / 2
+  radius(bridgeLeftCap) == bridgeOvalMinorD / 2
+  horizontalDistance([
+  bridgeRightCap.center,
+  bridgeRightCap.start
+]) == 0mm
+  verticalDistance([
+  bridgeRightCap.center,
+  bridgeRightCap.start
+]) == -bridgeOvalMinorD / 2
+  horizontalDistance([
+  bridgeRightCap.center,
+  bridgeRightCap.end
+]) == 0mm
+  verticalDistance([
+  bridgeRightCap.center,
+  bridgeRightCap.end
+]) == bridgeOvalMinorD / 2
+  horizontalDistance([
+  bridgeLeftCap.center,
+  bridgeLeftCap.start
+]) == 0mm
+  verticalDistance([
+  bridgeLeftCap.center,
+  bridgeLeftCap.start
+]) == bridgeOvalMinorD / 2
+  horizontalDistance([
+  bridgeLeftCap.center,
+  bridgeLeftCap.end
+]) == 0mm
+  verticalDistance([
+  bridgeLeftCap.center,
+  bridgeLeftCap.end
+]) == -bridgeOvalMinorD / 2
+
+  horizontalDistance([ORIGIN, bridgeRevolveAxis.start]) == -5mm
+  horizontalDistance([ORIGIN, bridgeRevolveAxis.end]) == 5mm
+  verticalDistance([ORIGIN, bridgeRevolveAxis.start]) == bridgeArcRadius
+  verticalDistance([ORIGIN, bridgeRevolveAxis.end]) == bridgeArcRadius
+}
+bridgeProfile = region(point = [0mm, 0mm], sketch = bridgeProfileSketch)
+
+export bridge = revolve(bridgeProfile, axis = bridgeProfileSketch.bridgeRevolveAxis, angle = 0deg - bridgeArcAngle)
+
+topBarPathSketch = sketch(on = XZ) {
+  topBarLine = line(start = [var -51mm, var 16.4mm], end = [var 51mm, var 16.4mm])
+
+  horizontalDistance([ORIGIN, topBarLine.start]) == -topBarHalfSpan
+  verticalDistance([ORIGIN, topBarLine.start]) == topBarZ
+  horizontalDistance([ORIGIN, topBarLine.end]) == topBarHalfSpan
+  verticalDistance([ORIGIN, topBarLine.end]) == topBarZ
+}
+
+topBarSectionPlane = {
+  origin = [-topBarHalfSpan, 0, topBarZ],
+  xAxis = [0, 0, -1],
+  yAxis = [0, 1, 0]
+}
+
+ovalTopBarCapOffset = (ovalTopBarMajorD - ovalTopBarMinorD) / 2
+topBarOvalSection = sketch(on = topBarSectionPlane) {
+  topBarRightSide = line(start = [var 0.5mm, var -0.7mm], end = [var 0.5mm, var 0.7mm])
+  topBarTopCap = arc(start = [var 0.5mm, var 0.7mm], end = [var -0.5mm, var 0.7mm], center = [var 0mm, var 0.7mm])
+  topBarLeftSide = line(start = [var -0.5mm, var 0.7mm], end = [var -0.5mm, var -0.7mm])
+  topBarBottomCap = arc(start = [var -0.5mm, var -0.7mm], end = [var 0.5mm, var -0.7mm], center = [var 0mm, var -0.7mm])
+
+  coincident([
+    topBarRightSide.end,
+    topBarTopCap.start
+  ])
+  coincident([topBarTopCap.end, topBarLeftSide.start])
+  coincident([
+    topBarLeftSide.end,
+    topBarBottomCap.start
+  ])
+  coincident([
+    topBarBottomCap.end,
+    topBarRightSide.start
+  ])
+
+  vertical(topBarRightSide)
+  vertical(topBarLeftSide)
+  tangent([topBarRightSide, topBarTopCap])
+  tangent([topBarTopCap, topBarLeftSide])
+  tangent([topBarLeftSide, topBarBottomCap])
+  tangent([topBarBottomCap, topBarRightSide])
+
+  horizontalDistance([ORIGIN, topBarTopCap.center]) == 0mm
+  verticalDistance([ORIGIN, topBarTopCap.center]) == ovalTopBarCapOffset
+  horizontalDistance([ORIGIN, topBarBottomCap.center]) == 0mm
+  verticalDistance([ORIGIN, topBarBottomCap.center]) == -ovalTopBarCapOffset
+  radius(topBarTopCap) == ovalTopBarMinorD / 2
+  radius(topBarBottomCap) == ovalTopBarMinorD / 2
+  horizontalDistance([
+  topBarTopCap.center,
+  topBarTopCap.start
+]) == ovalTopBarMinorD / 2
+  verticalDistance([
+  topBarTopCap.center,
+  topBarTopCap.start
+]) == 0mm
+  horizontalDistance([topBarTopCap.center, topBarTopCap.end]) == -ovalTopBarMinorD / 2
+  verticalDistance([topBarTopCap.center, topBarTopCap.end]) == 0mm
+  horizontalDistance([
+  topBarBottomCap.center,
+  topBarBottomCap.start
+]) == -ovalTopBarMinorD / 2
+  verticalDistance([
+  topBarBottomCap.center,
+  topBarBottomCap.start
+]) == 0mm
+  horizontalDistance([
+  topBarBottomCap.center,
+  topBarBottomCap.end
+]) == ovalTopBarMinorD / 2
+  verticalDistance([
+  topBarBottomCap.center,
+  topBarBottomCap.end
+]) == 0mm
+}
+topBarOvalRegion = region(point = [0mm, 0mm], sketch = topBarOvalSection)
+export ovalTopBar = sweep(
+  topBarOvalRegion,
+  path = topBarPathSketch.topBarLine,
+  sectional = true,
+  relativeTo = "trajectoryCurve",
+  version = 2,
+)
+
+templePlaneLeft = offsetPlane(YZ, offset = -(templeHingeOffset + lensBridgeW / 2))
+templePlaneRight = mirrorPlane(templePlaneLeft, planeNormal = [1, 0, 0])
+templeHookStartX = templeLen + templeHookForward
+
+templePathLeftSketch = sketch(on = templePlaneLeft) {
+  leftTempleHook = arc(start = [var 111.82mm, var -13.18mm], end = [var 80mm, var 0mm], center = [var 80mm, var -45mm])
+  leftTempleLine = line(start = [var 80mm, var 0mm], end = [var 0mm, var 0mm])
+
+  coincident([
+    leftTempleHook.end,
+    leftTempleLine.start
+  ])
+
+  horizontalDistance([ORIGIN, leftTempleHook.start]) == templeHookStartX
+  verticalDistance([ORIGIN, leftTempleHook.start]) == templeHookDrop
+  horizontalDistance([ORIGIN, leftTempleHook.center]) == templeLen
+  verticalDistance([ORIGIN, leftTempleHook.center]) == -templeHookRadius
+  horizontalDistance([ORIGIN, leftTempleHook.end]) == templeLen
+  verticalDistance([ORIGIN, leftTempleHook.end]) == 0mm
+  horizontalDistance([ORIGIN, leftTempleLine.end]) == 0mm
+  verticalDistance([ORIGIN, leftTempleLine.end]) == 0mm
+}
+templePathRightSketch = sketch(on = templePlaneRight) {
+  rightTempleHook = arc(start = [var 111.82mm, var -13.18mm], end = [var 80mm, var 0mm], center = [var 80mm, var -45mm])
+  rightTempleLine = line(start = [var 80mm, var 0mm], end = [var 0mm, var 0mm])
+
+  coincident([
+    rightTempleHook.end,
+    rightTempleLine.start
+  ])
+
+  horizontalDistance([ORIGIN, rightTempleHook.start]) == templeHookStartX
+  verticalDistance([ORIGIN, rightTempleHook.start]) == templeHookDrop
+  horizontalDistance([ORIGIN, rightTempleHook.center]) == templeLen
+  verticalDistance([ORIGIN, rightTempleHook.center]) == -templeHookRadius
+  horizontalDistance([ORIGIN, rightTempleHook.end]) == templeLen
+  verticalDistance([ORIGIN, rightTempleHook.end]) == 0mm
+  horizontalDistance([ORIGIN, rightTempleLine.end]) == 0mm
+  verticalDistance([ORIGIN, rightTempleLine.end]) == 0mm
+}
+
+templeSectionPlaneLeft = {
+  origin = [
+    -(templeHingeOffset + lensBridgeW / 2),
+    templeHookStartX,
+    templeHookDrop
+  ],
+  xAxis = [1, 0, 0],
+  yAxis = [0, 0.7071, 0.7071]
+}
+templeSectionPlaneRight = {
+  origin = [
+    templeHingeOffset + lensBridgeW / 2,
+    templeHookStartX,
+    templeHookDrop
+  ],
+  xAxis = [1, 0, 0],
+  yAxis = [0, 0.7071, 0.7071]
+}
+ovalTempleCapOffset = (ovalTempleMajorD - ovalTempleMinorD) / 2
+leftOvalTempleSection = sketch(on = templeSectionPlaneLeft) {
+  leftOvalTempleRightSide = line(start = [var 0.45mm, var -0.55mm], end = [var 0.45mm, var 0.55mm])
+  leftOvalTempleTop = arc(start = [var 0.45mm, var 0.55mm], end = [var -0.45mm, var 0.55mm], center = [var 0mm, var 0.55mm])
+  leftOvalTempleLeftSide = line(start = [var -0.45mm, var 0.55mm], end = [var -0.45mm, var -0.55mm])
+  leftOvalTempleBottom = arc(start = [var -0.45mm, var -0.55mm], end = [var 0.45mm, var -0.55mm], center = [var 0mm, var -0.55mm])
+
+  coincident([
+    leftOvalTempleRightSide.end,
+    leftOvalTempleTop.start
+  ])
+  coincident([
+    leftOvalTempleTop.end,
+    leftOvalTempleLeftSide.start
+  ])
+  coincident([
+    leftOvalTempleLeftSide.end,
+    leftOvalTempleBottom.start
+  ])
+  coincident([
+    leftOvalTempleBottom.end,
+    leftOvalTempleRightSide.start
+  ])
+
+  vertical(leftOvalTempleRightSide)
+  vertical(leftOvalTempleLeftSide)
+  tangent([
+    leftOvalTempleRightSide,
+    leftOvalTempleTop
+  ])
+  tangent([
+    leftOvalTempleTop,
+    leftOvalTempleLeftSide
+  ])
+  tangent([
+    leftOvalTempleLeftSide,
+    leftOvalTempleBottom
+  ])
+  tangent([
+    leftOvalTempleBottom,
+    leftOvalTempleRightSide
+  ])
+
+  horizontalDistance([ORIGIN, leftOvalTempleTop.center]) == 0mm
+  verticalDistance([ORIGIN, leftOvalTempleTop.center]) == ovalTempleCapOffset
+  horizontalDistance([ORIGIN, leftOvalTempleBottom.center]) == 0mm
+  verticalDistance([ORIGIN, leftOvalTempleBottom.center]) == -ovalTempleCapOffset
+  radius(leftOvalTempleTop) == ovalTempleMinorD / 2
+  radius(leftOvalTempleBottom) == ovalTempleMinorD / 2
+  horizontalDistance([
+  leftOvalTempleTop.center,
+  leftOvalTempleTop.start
+]) == ovalTempleMinorD / 2
+  verticalDistance([
+  leftOvalTempleTop.center,
+  leftOvalTempleTop.start
+]) == 0mm
+  horizontalDistance([
+  leftOvalTempleTop.center,
+  leftOvalTempleTop.end
+]) == -ovalTempleMinorD / 2
+  verticalDistance([
+  leftOvalTempleTop.center,
+  leftOvalTempleTop.end
+]) == 0mm
+  horizontalDistance([
+  leftOvalTempleBottom.center,
+  leftOvalTempleBottom.start
+]) == -ovalTempleMinorD / 2
+  verticalDistance([
+  leftOvalTempleBottom.center,
+  leftOvalTempleBottom.start
+]) == 0mm
+  horizontalDistance([
+  leftOvalTempleBottom.center,
+  leftOvalTempleBottom.end
+]) == ovalTempleMinorD / 2
+  verticalDistance([
+  leftOvalTempleBottom.center,
+  leftOvalTempleBottom.end
+]) == 0mm
+}
+rightOvalTempleSection = sketch(on = templeSectionPlaneRight) {
+  rightOvalTempleRightSide = line(start = [var 0.45mm, var -0.55mm], end = [var 0.45mm, var 0.55mm])
+  rightOvalTempleTop = arc(start = [var 0.45mm, var 0.55mm], end = [var -0.45mm, var 0.55mm], center = [var 0mm, var 0.55mm])
+  rightOvalTempleLeftSide = line(start = [var -0.45mm, var 0.55mm], end = [var -0.45mm, var -0.55mm])
+  rightOvalTempleBottom = arc(start = [var -0.45mm, var -0.55mm], end = [var 0.45mm, var -0.55mm], center = [var 0mm, var -0.55mm])
+
+  coincident([
+    rightOvalTempleRightSide.end,
+    rightOvalTempleTop.start
+  ])
+  coincident([
+    rightOvalTempleTop.end,
+    rightOvalTempleLeftSide.start
+  ])
+  coincident([
+    rightOvalTempleLeftSide.end,
+    rightOvalTempleBottom.start
+  ])
+  coincident([
+    rightOvalTempleBottom.end,
+    rightOvalTempleRightSide.start
+  ])
+
+  vertical(rightOvalTempleRightSide)
+  vertical(rightOvalTempleLeftSide)
+  tangent([
+    rightOvalTempleRightSide,
+    rightOvalTempleTop
+  ])
+  tangent([
+    rightOvalTempleTop,
+    rightOvalTempleLeftSide
+  ])
+  tangent([
+    rightOvalTempleLeftSide,
+    rightOvalTempleBottom
+  ])
+  tangent([
+    rightOvalTempleBottom,
+    rightOvalTempleRightSide
+  ])
+
+  horizontalDistance([ORIGIN, rightOvalTempleTop.center]) == 0mm
+  verticalDistance([ORIGIN, rightOvalTempleTop.center]) == ovalTempleCapOffset
+  horizontalDistance([ORIGIN, rightOvalTempleBottom.center]) == 0mm
+  verticalDistance([ORIGIN, rightOvalTempleBottom.center]) == -ovalTempleCapOffset
+  radius(rightOvalTempleTop) == ovalTempleMinorD / 2
+  radius(rightOvalTempleBottom) == ovalTempleMinorD / 2
+  horizontalDistance([
+  rightOvalTempleTop.center,
+  rightOvalTempleTop.start
+]) == ovalTempleMinorD / 2
+  verticalDistance([
+  rightOvalTempleTop.center,
+  rightOvalTempleTop.start
+]) == 0mm
+  horizontalDistance([
+  rightOvalTempleTop.center,
+  rightOvalTempleTop.end
+]) == -ovalTempleMinorD / 2
+  verticalDistance([
+  rightOvalTempleTop.center,
+  rightOvalTempleTop.end
+]) == 0mm
+  horizontalDistance([
+  rightOvalTempleBottom.center,
+  rightOvalTempleBottom.start
+]) == -ovalTempleMinorD / 2
+  verticalDistance([
+  rightOvalTempleBottom.center,
+  rightOvalTempleBottom.start
+]) == 0mm
+  horizontalDistance([
+  rightOvalTempleBottom.center,
+  rightOvalTempleBottom.end
+]) == ovalTempleMinorD / 2
+  verticalDistance([
+  rightOvalTempleBottom.center,
+  rightOvalTempleBottom.end
+]) == 0mm
+}
+leftOvalTempleRegion = region(point = [0mm, 0mm], sketch = leftOvalTempleSection)
+rightOvalTempleRegion = region(point = [0mm, 0mm], sketch = rightOvalTempleSection)
+
+leftTemplePath = [
+  templePathLeftSketch.leftTempleHook,
+  templePathLeftSketch.leftTempleLine
+]
+rightTemplePath = [
+  templePathRightSketch.rightTempleHook,
+  templePathRightSketch.rightTempleLine
+]
+
+export leftOvalTemple = sweep(
+  leftOvalTempleRegion,
+  path = leftTemplePath,
+  sectional = true,
+  relativeTo = "trajectoryCurve",
+  version = 2,
+)
+export rightOvalTemple = sweep(
+  rightOvalTempleRegion,
+  path = rightTemplePath,
+  sectional = true,
+  relativeTo = "trajectoryCurve",
+  version = 2,
+)
+
+hide(bridgeProfileSketch)
+hide(topBarPathSketch)
+hide(topBarOvalSection)
+hide(templePathLeftSketch)
+hide(templePathRightSketch)
+hide(leftOvalTempleSection)
+hide(rightOvalTempleSection)

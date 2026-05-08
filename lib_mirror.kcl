@@ -5,9 +5,9 @@
 export fn reflect(v, n) {
   dot = v[0] * n[0] + v[1] * n[1] + v[2] * n[2]
   return [
-    v[0] - 2 * dot * n[0],
-    v[1] - 2 * dot * n[1],
-    v[2] - 2 * dot * n[2]
+    v[0] - (2 * dot * n[0]),
+    v[1] - (2 * dot * n[1]),
+    v[2] - (2 * dot * n[2])
   ]
 }
 
@@ -15,7 +15,7 @@ export fn reflect(v, n) {
 export fn mirrorPlane(@p, planeNormal) {
   return {
     origin = reflect(v = p.origin, n = planeNormal),
-    xAxis  = reflect(v = p.xAxis,  n = planeNormal),
-    yAxis  = reflect(v = p.yAxis,  n = planeNormal)
+    xAxis = reflect(v = p.xAxis, n = planeNormal),
+    yAxis = reflect(v = p.yAxis, n = planeNormal)
   }
 }

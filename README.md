@@ -15,6 +15,8 @@ This project is a demonstration of high-fidelity, organic CAD design in KCL, cen
 
 My primary goal was to provide **utility over variety**. Instead of just making a pair of glasses for people to remix, I wanted to provide the "Legos" of advanced KCL design. By providing standalone libraries for splines and symmetry, I am giving the community the tools they need to build their own organic, symmetric products—whether they are building eyewear, furniture, or vehicles.
 
+![Aviator Lens Adjustment](lens_adjust.gif)
+
 ## See it in Action: Interactive Tuning
 
 To experience the power of the B-Spline "Control Cage," open **`aviator_lens.kcl`** in the Zoo Modeling App. 
@@ -24,9 +26,6 @@ To experience the power of the B-Spline "Control Cage," open **`aviator_lens.kcl
 3.  **Watch the Magic:** The high-fidelity smooth curve and 3D lens will update instantly as you manipulate the low-fidelity cage.
 
 This demonstration shows how code-native CAD can bridge the gap between rough ideation and precise, organic manufacturing.
-
-![Aviator Lens Adjustment](lens_adjust.gif)
-
 
 ---
 Built with [Zoo's KittyCAD Language (KCL)](https://zoo.dev)

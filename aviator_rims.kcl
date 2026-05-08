@@ -1,0 +1,227 @@
+// aviator_rims.kcl - Aviator metal rim module
+// Builds rim paths and swept oval rim bodies from the lens cage.
+import lensP0, lensP1, lensP2, lensP3, lensP4, lensP5, lensStartPt from "aviator_lens.kcl"
+import lensBridgeW, ovalRimMajorD, ovalRimMinorD from "aviator_params.kcl"
+import bsplineSegments from "lib_bspline.kcl"
+import mirrorPlane from "lib_mirror.kcl"
+
+ovalRimCapOffset = (ovalRimMajorD - ovalRimMinorD) / 2
+
+leftRimPlane = {
+  origin = [-lensBridgeW / 3, 0, 0],
+  xAxis = [-1, 0, 0],
+  yAxis = [0, 0, 1]
+}
+rightRimPlane = mirrorPlane(leftRimPlane, planeNormal = [1, 0, 0])
+
+leftRimPath = startSketchOn(leftRimPlane)
+  |> startProfile(at = lensStartPt)
+  |> bsplineSegments(
+       p0 = lensP0,
+       p1 = lensP1,
+       p2 = lensP2,
+       p3 = lensP3,
+       p4 = lensP4,
+       p5 = lensP5,
+     )
+  |> close()
+rightRimPath = startSketchOn(rightRimPlane)
+  |> startProfile(at = lensStartPt)
+  |> bsplineSegments(
+       p0 = lensP0,
+       p1 = lensP1,
+       p2 = lensP2,
+       p3 = lensP3,
+       p4 = lensP4,
+       p5 = lensP5,
+     )
+  |> close()
+
+leftRimSectionPlane = {
+  origin = [
+    -(lensBridgeW / 3) - lensStartPt[0],
+    0,
+    lensStartPt[1]
+  ],
+  xAxis = [0.13245, 0, 0.99119],
+  yAxis = [0, 1, 0]
+}
+rightRimSectionPlane = {
+  origin = [
+    lensBridgeW / 3 + lensStartPt[0],
+    0,
+    lensStartPt[1]
+  ],
+  xAxis = [0.13245, 0, -0.99119],
+  yAxis = [0, 1, 0]
+}
+
+leftOvalRimSection = sketch(on = leftRimSectionPlane) {
+  leftOvalRimRightSide = line(start = [var 0.55mm, var -0.75mm], end = [var 0.55mm, var 0.75mm])
+  leftOvalRimTop = arc(start = [var 0.55mm, var 0.75mm], end = [var -0.55mm, var 0.75mm], center = [var 0mm, var 0.75mm])
+  leftOvalRimLeftSide = line(start = [var -0.55mm, var 0.75mm], end = [var -0.55mm, var -0.75mm])
+  leftOvalRimBottom = arc(start = [var -0.55mm, var -0.75mm], end = [var 0.55mm, var -0.75mm], center = [var 0mm, var -0.75mm])
+
+  coincident([
+    leftOvalRimRightSide.end,
+    leftOvalRimTop.start
+  ])
+  coincident([
+    leftOvalRimTop.end,
+    leftOvalRimLeftSide.start
+  ])
+  coincident([
+    leftOvalRimLeftSide.end,
+    leftOvalRimBottom.start
+  ])
+  coincident([
+    leftOvalRimBottom.end,
+    leftOvalRimRightSide.start
+  ])
+
+  vertical(leftOvalRimRightSide)
+  vertical(leftOvalRimLeftSide)
+  tangent([leftOvalRimRightSide, leftOvalRimTop])
+  tangent([leftOvalRimTop, leftOvalRimLeftSide])
+  tangent([leftOvalRimLeftSide, leftOvalRimBottom])
+  tangent([
+    leftOvalRimBottom,
+    leftOvalRimRightSide
+  ])
+
+  horizontalDistance([ORIGIN, leftOvalRimTop.center]) == 0mm
+  verticalDistance([ORIGIN, leftOvalRimTop.center]) == ovalRimCapOffset
+  horizontalDistance([ORIGIN, leftOvalRimBottom.center]) == 0mm
+  verticalDistance([ORIGIN, leftOvalRimBottom.center]) == -ovalRimCapOffset
+  radius(leftOvalRimTop) == ovalRimMinorD / 2
+  radius(leftOvalRimBottom) == ovalRimMinorD / 2
+  horizontalDistance([
+  leftOvalRimTop.center,
+  leftOvalRimTop.start
+]) == ovalRimMinorD / 2
+  verticalDistance([
+  leftOvalRimTop.center,
+  leftOvalRimTop.start
+]) == 0mm
+  horizontalDistance([
+  leftOvalRimTop.center,
+  leftOvalRimTop.end
+]) == -ovalRimMinorD / 2
+  verticalDistance([
+  leftOvalRimTop.center,
+  leftOvalRimTop.end
+]) == 0mm
+  horizontalDistance([
+  leftOvalRimBottom.center,
+  leftOvalRimBottom.start
+]) == -ovalRimMinorD / 2
+  verticalDistance([
+  leftOvalRimBottom.center,
+  leftOvalRimBottom.start
+]) == 0mm
+  horizontalDistance([
+  leftOvalRimBottom.center,
+  leftOvalRimBottom.end
+]) == ovalRimMinorD / 2
+  verticalDistance([
+  leftOvalRimBottom.center,
+  leftOvalRimBottom.end
+]) == 0mm
+}
+rightOvalRimSection = sketch(on = rightRimSectionPlane) {
+  rightOvalRimRightSide = line(start = [var 0.55mm, var -0.75mm], end = [var 0.55mm, var 0.75mm])
+  rightOvalRimTop = arc(start = [var 0.55mm, var 0.75mm], end = [var -0.55mm, var 0.75mm], center = [var 0mm, var 0.75mm])
+  rightOvalRimLeftSide = line(start = [var -0.55mm, var 0.75mm], end = [var -0.55mm, var -0.75mm])
+  rightOvalRimBottom = arc(start = [var -0.55mm, var -0.75mm], end = [var 0.55mm, var -0.75mm], center = [var 0mm, var -0.75mm])
+
+  coincident([
+    rightOvalRimRightSide.end,
+    rightOvalRimTop.start
+  ])
+  coincident([
+    rightOvalRimTop.end,
+    rightOvalRimLeftSide.start
+  ])
+  coincident([
+    rightOvalRimLeftSide.end,
+    rightOvalRimBottom.start
+  ])
+  coincident([
+    rightOvalRimBottom.end,
+    rightOvalRimRightSide.start
+  ])
+
+  vertical(rightOvalRimRightSide)
+  vertical(rightOvalRimLeftSide)
+  tangent([rightOvalRimRightSide, rightOvalRimTop])
+  tangent([rightOvalRimTop, rightOvalRimLeftSide])
+  tangent([
+    rightOvalRimLeftSide,
+    rightOvalRimBottom
+  ])
+  tangent([
+    rightOvalRimBottom,
+    rightOvalRimRightSide
+  ])
+
+  horizontalDistance([ORIGIN, rightOvalRimTop.center]) == 0mm
+  verticalDistance([ORIGIN, rightOvalRimTop.center]) == ovalRimCapOffset
+  horizontalDistance([ORIGIN, rightOvalRimBottom.center]) == 0mm
+  verticalDistance([ORIGIN, rightOvalRimBottom.center]) == -ovalRimCapOffset
+  radius(rightOvalRimTop) == ovalRimMinorD / 2
+  radius(rightOvalRimBottom) == ovalRimMinorD / 2
+  horizontalDistance([
+  rightOvalRimTop.center,
+  rightOvalRimTop.start
+]) == ovalRimMinorD / 2
+  verticalDistance([
+  rightOvalRimTop.center,
+  rightOvalRimTop.start
+]) == 0mm
+  horizontalDistance([
+  rightOvalRimTop.center,
+  rightOvalRimTop.end
+]) == -ovalRimMinorD / 2
+  verticalDistance([
+  rightOvalRimTop.center,
+  rightOvalRimTop.end
+]) == 0mm
+  horizontalDistance([
+  rightOvalRimBottom.center,
+  rightOvalRimBottom.start
+]) == -ovalRimMinorD / 2
+  verticalDistance([
+  rightOvalRimBottom.center,
+  rightOvalRimBottom.start
+]) == 0mm
+  horizontalDistance([
+  rightOvalRimBottom.center,
+  rightOvalRimBottom.end
+]) == ovalRimMinorD / 2
+  verticalDistance([
+  rightOvalRimBottom.center,
+  rightOvalRimBottom.end
+]) == 0mm
+}
+leftOvalRimRegion = region(point = [0mm, 0mm], sketch = leftOvalRimSection)
+rightOvalRimRegion = region(point = [0mm, 0mm], sketch = rightOvalRimSection)
+
+export leftOvalRim = sweep(
+  leftOvalRimRegion,
+  path = leftRimPath,
+  sectional = true,
+  relativeTo = "trajectoryCurve",
+  version = 2,
+)
+export rightOvalRim = sweep(
+  rightOvalRimRegion,
+  path = rightRimPath,
+  sectional = true,
+  relativeTo = "trajectoryCurve",
+  version = 2,
+)
+
+hide(leftRimPath)
+hide(rightRimPath)
+hide(leftOvalRimSection)
+hide(rightOvalRimSection)

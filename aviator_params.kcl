@@ -1,0 +1,27 @@
+// aviator_params.kcl - Shared aviator frame parameters
+// Centralizes dimensions used by lens, rims, and frame hardware.
+export lensBridgeW = 18mm
+export lensDepth = 2mm
+export templeHingeOffset = 39mm
+
+export bridgeAnchorZ = 7.5mm
+export bridgeRise = 4.5mm
+export bridgeHalfSpan = 6.5mm
+export bridgeOvalMajorD = 2.0mm
+export bridgeOvalMinorD = 1.1mm
+export bridgeCornerRadius = 2mm
+
+export topBarHalfSpan = 24mm
+export topBarZ = 16mm
+
+export ovalRimMajorD = 2.6mm
+export ovalRimMinorD = 1.1mm
+export ovalTempleMajorD = 2.0mm
+export ovalTempleMinorD = 0.9mm
+export ovalTopBarMajorD = 2.6mm
+export ovalTopBarMinorD = 1.1mm
+
+export templeLen = 80mm
+export templeHookRadius = 45mm
+export templeHookForward = 31.82mm
+export templeHookDrop = -13.18mm
