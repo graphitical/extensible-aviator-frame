@@ -2,7 +2,7 @@
 // Centralizes dimensions used by lens, rims, and frame hardware.
 export lensBridgeW = 18mm
 export lensDepth = 2mm
-export templeHingeOffset = 39mm
+export templeHingeOffset = 42mm
 
 export bridgeAnchorZ = 7.5mm
 export bridgeRise = 4.5mm
