@@ -5,3 +5,6 @@ id = "2cbfae71-98b2-4b45-a417-df757433a55e"
 zookeeper_mode = "fast"
 
 [settings.modeling]
+
+[cloud."zoo.dev"]
+project_id = "cb776f5b-0d63-4db0-a2b2-9157a956195a"
