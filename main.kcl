@@ -3,8 +3,11 @@
 import "aviator_lens.kcl" as aviatorLens
 import leftOvalRim, rightOvalRim from "aviator_rims.kcl"
 import bridge, ovalTopBar, leftOvalTemple, rightOvalTemple from "aviator_hardware.kcl"
+import lensBridgeW from "aviator_params.kcl"
 
 leftLens = aviatorLens
+  |> translate(x = lensBridgeW / 3, y = 0, z = 0)
+
 rightLens = clone(aviatorLens)
   |> scale(x = -1, global = true)
 
@@ -25,3 +28,4 @@ leftOvalTemple
   |> appearance(color = "#ffd700", metalness = 100, roughness = 50)
 rightOvalTemple
   |> appearance(color = "#ffd700", metalness = 100, roughness = 50)
+

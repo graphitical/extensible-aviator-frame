@@ -7,7 +7,7 @@ This project is a demonstration of high-fidelity, organic CAD design in KCL, cen
 ## Key Innovations & Toolboxes
 
 *   **The B-Spline Library (`lib_bspline.kcl`):** To capture the subtle, organic "teardrop" of the classic aviator, I implemented a custom **periodic cubic B-Spline library**. This allows for **C2-continuous curves** (mathematically smooth) that standard lines and arcs cannot achieve. By defining a low-fidelity "control cage," the library generates high-fidelity, automotive-grade surfaces automatically.
-*   **3D Mirroring "Polyfill":** KCL currently lacks a native 3D mirror tool. I solved this by engineering a **coordinate-system-level mirroring toolkit**. By mathematically reflecting the workspace (planes) instead of the geometry, I achieved perfect symmetry and interactivity across the center line without duplicating code or manually calculating every vertex.
+*   **3D Mirroring "Polyfill":** As of at the time of submission, KCL lacked a native 3D mirror tool (since then it has been added). I solved this by engineering a **coordinate-system-level mirroring toolkit**. By mathematically reflecting the workspace (planes) instead of the geometry, I achieved perfect symmetry and interactivity across the center line without duplicating code or manually calculating every vertex.
 *   **Parametric Assembly:** The design is fully interactive. The "Master Cage" in `main.kcl` allows a user to tune the organic lens shape in real-time, with the symmetric 3D rims, glass lenses, and gold-metallic frame updating instantly.
 *   **Visual Polish:** Leverages advanced `appearance` properties, including light-blue glass transparency (`opacity: 40`) and polished gold metallic finishes (`metalness: 100`, `roughness: 90`).
 

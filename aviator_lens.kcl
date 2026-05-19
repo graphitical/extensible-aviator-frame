@@ -28,13 +28,7 @@ export lensP4 = cage.seg4.end.at
 export lensP5 = cage.seg5.end.at
 export lensStartPt = bsplineStartPoint(lensP0, p1 = lensP1, p2 = lensP2)
 
-leftLensPlane = {
-  origin = [-lensBridgeW / 3, 0, 0],
-  xAxis = [-1, 0, 0],
-  yAxis = [0, 0, 1]
-}
-
-export aviatorLens = startSketchOn(leftLensPlane)
+export aviatorLens = startSketchOn(XZ)
   |> startProfile(at = lensStartPt)
   |> bsplineSegments(
        p0 = lensP0,
